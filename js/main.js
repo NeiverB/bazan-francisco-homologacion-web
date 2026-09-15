@@ -249,9 +249,28 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   // ------------------------------------------------------------------
-  // ESTADO: el carrito es un array de { id, cantidad }
+  // ESTADO: el carrito es un array de { id, cantidad }, guardado en
+  // localStorage para que sobreviva a recargar la página.
   // ------------------------------------------------------------------
+  const CLAVE_CARRITO = 'ecoquim-carrito';
   let carrito = [];
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_CARRITO) || '[]');
+    carrito = Array.isArray(guardado)
+      ? guardado.filter(item => item && item.cantidad > 0 && PRODUCTOS.some(p => p.id === item.id))
+      : [];
+  } catch (e) {
+    carrito = [];
+  }
+
+  function guardarCarrito() {
+    try {
+      localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+    } catch (e) {
+      // localStorage puede fallar (modo privado, cuota llena); el carrito
+      // sigue funcionando en memoria durante la sesión.
+    }
+  }
 
   // Historial de pedidos confirmados, guardado en el navegador (localStorage)
   // para que no se pierda al recargar la página. No requiere servidor.
@@ -442,6 +461,8 @@ document.addEventListener('DOMContentLoaded', function () {
   btnVaciarCarrito.addEventListener('click', vaciarCarrito);
 
   function renderizarCarrito() {
+    guardarCarrito();
+
     const totalItems = carrito.reduce((n, i) => n + i.cantidad, 0);
     contadorCarrito.textContent = totalItems;
     btnVaciarCarrito.hidden = carrito.length === 0;

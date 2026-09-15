@@ -347,7 +347,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const boton = evento.target.closest('[data-accion="agregar"]');
     if (!boton) return;
     agregarAlCarrito(boton.dataset.id);
+    confirmarAgregado(boton);
   });
+
+  // Feedback visual inmediato en el propio botón: evita que el cliente crea
+  // que el clic no hizo nada cuando en realidad sí se agregó al carrito.
+  function confirmarAgregado(boton) {
+    if (boton.dataset.animando === '1') return;
+    boton.dataset.animando = '1';
+    const contenidoOriginal = boton.innerHTML;
+    boton.disabled = true;
+    boton.classList.add('btn-agregado');
+    boton.innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i> Agregado';
+    setTimeout(() => {
+      boton.innerHTML = contenidoOriginal;
+      boton.classList.remove('btn-agregado');
+      boton.disabled = false;
+      delete boton.dataset.animando;
+    }, 900);
+  }
 
   // ------------------------------------------------------------------
   // CARRITO: agregar, cambiar cantidad, eliminar
@@ -360,6 +378,14 @@ document.addEventListener('DOMContentLoaded', function () {
       carrito.push({ id, cantidad: 1 });
     }
     renderizarCarrito();
+    pulsarContador();
+  }
+
+  // Reinicia la animación aunque se agregue varias veces seguido rápido
+  function pulsarContador() {
+    contadorCarrito.classList.remove('pulso');
+    void contadorCarrito.offsetWidth;
+    contadorCarrito.classList.add('pulso');
   }
 
   function cambiarCantidad(id, delta) {

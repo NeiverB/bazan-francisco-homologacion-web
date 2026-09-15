@@ -431,10 +431,26 @@ document.addEventListener('DOMContentLoaded', function () {
   const resumenCarrito = document.getElementById('carrito-resumen');
   const formCheckout = document.getElementById('form-checkout');
   const contadorCarrito = document.getElementById('carrito-contador');
+  const btnVaciarCarrito = document.getElementById('btn-vaciar-carrito');
+  const carritoAnuncio = document.getElementById('carrito-anuncio');
+
+  function vaciarCarrito() {
+    carrito = [];
+    renderizarCarrito();
+  }
+
+  btnVaciarCarrito.addEventListener('click', vaciarCarrito);
 
   function renderizarCarrito() {
     const totalItems = carrito.reduce((n, i) => n + i.cantidad, 0);
     contadorCarrito.textContent = totalItems;
+    btnVaciarCarrito.hidden = carrito.length === 0;
+
+    // Anuncio para lectores de pantalla: el cambio no siempre es visible
+    // de inmediato (ej. al agregar desde el catálogo con el carrito cerrado)
+    carritoAnuncio.textContent = totalItems === 0
+      ? 'El carrito está vacío.'
+      : `Carrito actualizado: ${totalItems} producto${totalItems === 1 ? '' : 's'}.`;
 
     if (carrito.length === 0) {
       listaCarrito.innerHTML = '<p class="carrito-vacio"><i class="fa-solid fa-cart-shopping fa-2x mb-2 d-block"></i>Tu carrito está vacío.</p>';
@@ -618,6 +634,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('conf-total').textContent = formatoMoneda(subtotal + envio);
 
     listaCarrito.parentElement.querySelectorAll('#carrito-lista, #carrito-resumen').forEach(el => el.hidden = true);
+    btnVaciarCarrito.hidden = true;
     formCheckout.hidden = true;
     document.getElementById('confirmacion').hidden = false;
   }

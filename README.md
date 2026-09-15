@@ -35,6 +35,7 @@ img/                 logotipo y fotografías de producto
 
 | Campo | Detalle |
 |---|---|
+| **Nombre** | Neiver Francisco Bazán |
 | **Tema del proyecto** | Sitio de catálogo y carrito de compras para EcoQuim (negocio de limpieza, laboratorio y perfumería en Cuenca, Ecuador) |
 | **Herramientas utilizadas** | HTML5, CSS3, JavaScript, Bootstrap 5, Font Awesome |
 | **¿Utilizó IA generativa?** | Sí |

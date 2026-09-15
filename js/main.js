@@ -549,10 +549,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function validarFormulario() {
     let valido = true;
+    // checkValidity() usa las reglas nativas del navegador: no solo que el
+    // campo requerido no esté vacío, también que el formato sea correcto
+    // (ej. el correo debe tener forma de correo, no cualquier texto).
     formCheckout.querySelectorAll('[required]').forEach(campo => {
-      const vacio = !campo.value.trim();
-      campo.classList.toggle('campo-invalido', vacio);
-      if (vacio) valido = false;
+      const invalido = !campo.checkValidity();
+      campo.classList.toggle('campo-invalido', invalido);
+      if (invalido) valido = false;
     });
     return valido;
   }
@@ -561,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function () {
     evento.preventDefault();
 
     if (!validarFormulario()) {
-      formError.textContent = 'Completa los campos obligatorios antes de confirmar.';
+      formError.textContent = 'Revisa los campos marcados en rojo: falta completarlos o el formato no es válido.';
       formError.hidden = false;
       return;
     }

@@ -254,7 +254,13 @@
   <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCarrito" aria-labelledby="offcanvasCarritoLabel">
     <div class="offcanvas-header">
       <h2 class="offcanvas-title h5" id="offcanvasCarritoLabel">Tu carrito</h2>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-outline-eco btn-sm position-relative" data-bs-toggle="modal" data-bs-target="#modalHistorial">
+          <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Historial
+          <span class="carrito-contador" id="historial-contador" style="position: static; margin-left: 0.3rem;">0</span>
+        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+      </div>
     </div>
     <div class="offcanvas-body d-flex flex-column">
 
@@ -335,6 +341,19 @@
         <button type="button" class="btn btn-outline-eco w-100 mt-3" id="btn-nuevo-pedido">Hacer otro pedido</button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ============================= MODAL: HISTORIAL DE PEDIDOS ============================= -->
+  <div class="modal fade" id="modalHistorial" tabindex="-1" aria-labelledby="modalHistorialLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="modalHistorialLabel">Historial de pedidos</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="historial-lista"></div>
+      </div>
     </div>
   </div>
 

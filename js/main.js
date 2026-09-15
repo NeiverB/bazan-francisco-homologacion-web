@@ -253,6 +253,16 @@ document.addEventListener('DOMContentLoaded', function () {
   // ------------------------------------------------------------------
   let carrito = [];
 
+  // Historial de pedidos confirmados, guardado en el navegador (localStorage)
+  // para que no se pierda al recargar la página. No requiere servidor.
+  const CLAVE_HISTORIAL = 'ecoquim-historial-pedidos';
+  let historialPedidos = [];
+  try {
+    historialPedidos = JSON.parse(localStorage.getItem(CLAVE_HISTORIAL) || '[]');
+  } catch (e) {
+    historialPedidos = [];
+  }
+
   function buscarProducto(id) {
     return PRODUCTOS.find(p => p.id === id);
   }
@@ -520,8 +530,76 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     formError.hidden = true;
 
+    guardarEnHistorial();
     mostrarConfirmacion();
   });
+
+  // Guarda una copia del pedido confirmado en el historial (localStorage)
+  function guardarEnHistorial() {
+    const subtotal = calcularSubtotal();
+    const envio = calcularEnvio(subtotal);
+    const modalidad = MODALIDADES[selectModalidad.value];
+
+    historialPedidos.unshift({
+      fecha: new Date().toISOString(),
+      nombre: document.getElementById('cf-nombre').value.trim(),
+      modalidad: modalidad.etiqueta,
+      items: carrito.map(item => {
+        const p = buscarProducto(item.id);
+        return p ? { nombre: p.nombre, precio: p.precio, cantidad: item.cantidad } : null;
+      }).filter(Boolean),
+      subtotal,
+      envio,
+      total: subtotal + envio,
+    });
+
+    try {
+      localStorage.setItem(CLAVE_HISTORIAL, JSON.stringify(historialPedidos));
+    } catch (e) {
+      // localStorage puede fallar (modo privado, cuota llena); el pedido
+      // ya se guardó en memoria y se ve en el historial durante la sesión.
+    }
+
+    actualizarContadorHistorial();
+  }
+
+  function actualizarContadorHistorial() {
+    document.getElementById('historial-contador').textContent = historialPedidos.length;
+  }
+
+  function renderizarHistorial() {
+    const cont = document.getElementById('historial-lista');
+
+    if (historialPedidos.length === 0) {
+      cont.innerHTML = '<p class="text-muted text-center mb-0">Todavía no has hecho ningún pedido.</p>';
+      return;
+    }
+
+    cont.innerHTML = historialPedidos.map((pedido, indice) => {
+      const fecha = new Date(pedido.fecha).toLocaleString('es-EC', { dateStyle: 'medium', timeStyle: 'short' });
+      const itemsHtml = pedido.items.map(item =>
+        `<li>${item.cantidad} × ${escapaHtml(item.nombre)} — ${formatoMoneda(item.precio * item.cantidad)}</li>`
+      ).join('');
+      const separador = indice < historialPedidos.length - 1 ? 'border-bottom pb-3 mb-3' : '';
+
+      return `
+        <div class="${separador}">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <strong>${escapaHtml(pedido.nombre)}</strong>
+            <span class="text-muted small text-nowrap ms-2">${fecha}</span>
+          </div>
+          <ul class="list-unstyled small mb-2">${itemsHtml}</ul>
+          <div class="d-flex justify-content-between small">
+            <span class="text-muted">Envío: ${escapaHtml(pedido.modalidad)} (${formatoMoneda(pedido.envio)})</span>
+            <strong>${formatoMoneda(pedido.total)}</strong>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('modalHistorial').addEventListener('show.bs.modal', renderizarHistorial);
+  actualizarContadorHistorial();
 
   function mostrarConfirmacion() {
     const subtotal = calcularSubtotal();
@@ -545,7 +623,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   document.getElementById('btn-nuevo-pedido').addEventListener('click', function () {
-    carrito = [];
+    // El carrito se mantiene con los mismos productos para poder repetir
+    // el pedido fácilmente; solo se limpian los datos del formulario.
     formCheckout.reset();
     formCheckout.hidden = false;
     formError.hidden = true;
